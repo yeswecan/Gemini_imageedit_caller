@@ -16,6 +16,8 @@ This project provides a REST API server for AI-powered face swapping with automa
 
 The server processes requests through a three-stage pipeline. First, it sends the template illustration and selfie to Google's Gemini model via OpenRouter API to generate the face swap. Then, InsightFace detects facial landmarks (eyes and mouth centers) in both the template and generated images. Finally, the system calculates the required scale, rotation, and translation to align the generated face with the template's face position, ensuring perfect placement in the final output.
 
+**Note**: Face alignment works best with photorealistic images. For stylized illustrations, InsightFace may have difficulty detecting landmarks, resulting in alignment failures. In such cases, the system returns the unaligned generated image.
+
 ## API Endpoints
 
 ### `POST /swap_face`

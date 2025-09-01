@@ -16,8 +16,12 @@ logger = logging.getLogger(__name__)
 class FaceAligner:
     def __init__(self, det_size=(640, 640)):
         """Initialize face analysis app with InsightFace"""
-        self.app = FaceAnalysis(providers=['CPUExecutionProvider'])
-        self.app.prepare(ctx_id=0, det_size=det_size)
+        # Use a more permissive configuration for illustrations
+        self.app = FaceAnalysis(
+            providers=['CPUExecutionProvider'],
+            allowed_modules=['detection', 'landmark_2d_106']  # Focus on 2D landmarks
+        )
+        self.app.prepare(ctx_id=0, det_size=det_size, det_thresh=0.3)  # Lower threshold for illustrations
         
     def detect_landmarks(self, image_path):
         """
@@ -165,8 +169,10 @@ class FaceAligner:
             
             # Create transformation matrix
             # First, scale and rotate around the generated eye center
+            eye_center = generated_result['eye_center']
+            center_point = (int(eye_center[0]), int(eye_center[1]))
             M1 = cv2.getRotationMatrix2D(
-                tuple(generated_result['eye_center'].astype(int)),
+                center_point,
                 align_params['angle'],
                 align_params['scale']
             )

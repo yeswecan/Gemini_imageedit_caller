@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import time
+import json
 from pathlib import Path
 
 # Read prompt
@@ -7,8 +8,16 @@ prompt_path = Path("prompt.md")
 PROMPT = prompt_path.read_text().strip()
 MODEL = "google/gemini-2.5-flash-image-preview"
 
+def read_generation_log():
+    """Read generation log if it exists"""
+    log_path = Path("generation_log.json")
+    if log_path.exists():
+        with open(log_path, 'r') as f:
+            return json.load(f)
+    return {}
+
 def generate_simple_markdown_table():
-    """Generate simplified markdown table with just images or X emoji"""
+    """Generate simplified markdown table with images, times, and retry counts"""
     # Get all characters and selfies
     characters_dir = Path("characters")
     selfies_dir = Path("selfies_samples")
@@ -16,6 +25,9 @@ def generate_simple_markdown_table():
     
     characters = sorted(list(characters_dir.glob("*.png")))
     selfies = sorted(list(selfies_dir.glob("*.jpg")))[:8]  # Use only first 8 selfies
+    
+    # Read generation log for timing and retry info
+    gen_log = read_generation_log()
     
     # Generate markdown content
     md_content = "# Image Generation Results\n\n"
@@ -47,9 +59,18 @@ def generate_simple_markdown_table():
             output_path = results_dir / output_name
             
             if output_path.exists():
-                # Success - show image only
+                # Success - show image with time and retries if available
                 img_path = f"results/{output_name}"
                 cell_content = f"![{output_name}]({img_path})"
+                
+                # Add timing info if available from log
+                log_key = f"{character.stem}_{selfie.stem}"
+                if log_key in gen_log:
+                    gen_time = gen_log[log_key].get('time', 0)
+                    retries = gen_log[log_key].get('retries', 0)
+                    cell_content += f"<br>{gen_time:.1f}s"
+                    if retries > 0:
+                        cell_content += f" ({retries} retry)"
             else:
                 # Failure - show X emoji
                 cell_content = "❌"

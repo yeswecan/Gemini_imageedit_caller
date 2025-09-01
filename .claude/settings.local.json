@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(chmod:*)",
+      "Bash(kaggle datasets list:*)",
+      "Bash(kaggle datasets download:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:openrouter.ai)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)"
+    ],
+    "deny": []
+  }
+}

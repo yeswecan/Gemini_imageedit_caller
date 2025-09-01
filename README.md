@@ -1,36 +1,71 @@
-# Gemini Image Edit Caller
+# AI Face Swap API Server
 
-Automated face and hair transfer using Google's Gemini 2.5 Flash Image Preview model via OpenRouter API. The project applies facial features and hairstyles from real selfie photos onto illustrated character designs.
+Automated face transfer API server using Google's Gemini 2.5 Flash Image Preview model. The system transfers facial features and hairstyles from selfie photos onto illustrated character templates with automatic alignment using InsightFace landmark detection.
 
 ## Overview
 
-- **Input**: 20 character illustrations × 8 selfie photos = 160 combinations
-- **Success Rate**: 145 successful generations (90.6%)
-- **Results**: View the complete grid in [results_table.md](results_table.md)
+This project provides a REST API server for AI-powered face swapping with automatic face alignment. The core functionality:
+- Accepts a template illustration and a selfie photo
+- Generates a face swap using Gemini API
+- Automatically aligns the result to match the template's face position/scale
+- Returns the aligned image ready for use
+
+**Success Rate**: 145/160 (90.6%) in batch testing - see [results_table.md](results_table.md)
 
 ## How It Works
 
-The system takes two images: a character illustration and a selfie photo. Using the Gemini API, it transfers the face and hairstyle from the selfie onto the character while preserving the original pose, outfit, background, and art style. Each generation takes about 18 seconds, with automatic retry logic and rate limiting for reliable batch processing.
+The server processes requests through a three-stage pipeline. First, it sends the template illustration and selfie to Google's Gemini model via OpenRouter API to generate the face swap. Then, InsightFace detects facial landmarks (eyes and mouth centers) in both the template and generated images. Finally, the system calculates the required scale, rotation, and translation to align the generated face with the template's face position, ensuring perfect placement in the final output.
 
-## Repository Structure
+## API Endpoints
 
-```
-├── characters/          # 20 source character illustrations
-├── selfies_samples/     # 8 source selfie photos
-├── results/            # 145 generated images
-├── results_table.md    # Visual grid of all transformations
-├── generate_all_results.py  # Main batch processing script
-└── test_single_image.py     # Single pair testing script
-```
+### `POST /swap_face`
+Main endpoint for face swapping with alignment.
+
+**Request**: `multipart/form-data`
+- `template`: Template illustration image file (PNG/JPG)
+- `selfie`: Selfie photo image file (PNG/JPG)
+
+**Response**: Aligned face-swapped image (PNG)
+
+**Response Headers**:
+- `X-Generation-Time`: Time taken for AI generation
+- `X-Alignment-Status`: success/failed
+- `X-Total-Time`: Total processing time
+- `X-Retries`: Number of API retries
+
+### `GET /health`
+Health check endpoint returning server status.
 
 ## Quick Start
 
-1. Install dependencies: `pip install -r requirements.txt`
-2. Add your OpenRouter API key to `.env` file
-3. Run: `python generate_all_results.py`
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-## Example Results
+2. Set your OpenRouter API key in `.env`:
+```
+OPENROUTER_API_KEY=your_key_here
+```
 
-![Results Preview](results_table.md)
+3. Start the server:
+```bash
+python server.py
+```
 
-Failed generations (marked with ❌) are typically due to content filtering.
+4. Test with curl:
+```bash
+curl -X POST http://localhost:5000/swap_face \
+  -F "template=@characters/Ali_F.png" \
+  -F "selfie=@selfies_samples/005_Selfie_12.jpg" \
+  --output result.png
+```
+
+## Batch Processing
+
+For testing or batch processing, use:
+```bash
+python generate_all_results.py
+```
+
+This processes all character-selfie combinations and generates a visual results table with timing and retry information.

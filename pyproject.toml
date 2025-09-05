@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gemini-style-align"
+version = "0.1.0"
+description = "Style transfer (Gemini/OpenRouter) with 3-point face alignment using InsightFace or Mediapipe"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{ name = "Zebra", email = "no-reply@example.com" }]
+dependencies = [
+  "requests>=2.31.0",
+  "Pillow>=10.0.0",
+  "python-dotenv>=1.0.0",
+  "opencv-python>=4.8.0",
+  "insightface>=0.7.3",
+  "onnxruntime>=1.16.0",
+  "mediapipe>=0.10.0,<0.11",
+  "numpy<2.0.0",
+  "scipy>=1.11.0",
+  "flask>=3.0.0",
+  "flask-cors>=4.0.0",
+]
+
+[project.urls]
+homepage = "https://example.com"
+repository = "https://example.com/repo"
+
+[tool.setuptools]
+packages = [
+  "alignment",
+]
+include-package-data = false
+
+

@@ -71,3 +71,28 @@ python generate_all_results.py
 ```
 
 This processes all character-selfie combinations and generates a visual results table with timing and retry information.
+
+## Library Usage (as a package)
+
+Install (editable):
+```bash
+pip install -e .
+```
+
+Use alignment APIs:
+```python
+from alignment import (
+    align_generated_to_template,
+    select_consistent_landmarks,
+    InsightFaceLandmarkDetector,
+    MediapipeLandmarkDetector,
+)
+
+tmpl = Path("characters/Ali_F.png")
+gen  = Path("debug/consistency_run/generated.png")
+out  = Path("debug/consistency_run/aligned.png")
+
+# Align using a specific detector
+res = align_generated_to_template(gen, tmpl, out, disable_mediapipe=True)
+print(res["success"], res["method"], res["output_path"]) 
+```

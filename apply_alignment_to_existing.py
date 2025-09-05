@@ -5,7 +5,7 @@ Apply face alignment to existing generated results.
 import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from face_alignment import align_generated_image
+from face_alignment_unified import align_generated_image
 import shutil
 
 def process_existing_result(character_path, result_path, aligned_dir):
@@ -26,22 +26,18 @@ def process_existing_result(character_path, result_path, aligned_dir):
         print(f"✓ Aligned: {output_name} (scale: {alignment_result.get('scale', 1.0):.3f})")
         return True
     else:
-        # If alignment fails, copy original
+        # If alignment fails, keep original; avoid copying onto itself
         print(f"✗ Alignment failed: {output_name} - {alignment_result['error']}")
-        shutil.copy2(result_path, output_path)
+        if result_path.resolve() != output_path.resolve():
+            shutil.copy2(result_path, output_path)
         return False
 
 def main():
     """Apply alignment to all existing results."""
     characters_dir = Path("characters")
-    results_dir = Path("results_backup_before_alignment")
+    # Prefer current results to ensure full coverage of combinations
+    results_dir = Path("results")
     aligned_dir = Path("results")
-    
-    if not results_dir.exists():
-        print("No backup results found. Using current results directory.")
-        results_dir = Path("results")
-        aligned_dir = Path("results_aligned")
-        aligned_dir.mkdir(exist_ok=True)
     
     # Get all results
     results = list(results_dir.glob("*.png"))

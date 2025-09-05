@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from PIL import Image
 import io
-from face_alignment import align_generated_image
+from face_alignment_unified import align_generated_image
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -231,6 +231,15 @@ class ImageProcessor:
         
         result['total_time'] = time.time() - start_time
         return result
+    
+    def swap_face(self, template_path, selfie_path, output_path=None, align=True):
+        """
+        Convenience method to swap faces.
+        """
+        if output_path is None:
+            output_path = Path("results") / f"{Path(template_path).stem}_{Path(selfie_path).stem}_result.png"
+            output_path.parent.mkdir(exist_ok=True)
+        return self.process_images(template_path, selfie_path, output_path, align)
 
 # Singleton instance
 _processor = None
@@ -241,3 +250,13 @@ def get_processor():
     if _processor is None:
         _processor = ImageProcessor()
     return _processor
+
+def swap_face(template_path, selfie_path, output_path=None, align=True):
+    """
+    Convenience function to swap faces between template and selfie.
+    """
+    processor = get_processor()
+    if output_path is None:
+        output_path = Path("results") / f"{Path(template_path).stem}_{Path(selfie_path).stem}_result.png"
+        output_path.parent.mkdir(exist_ok=True)
+    return processor.process_images(template_path, selfie_path, output_path, align)
